@@ -16,7 +16,6 @@ import com.kucoin.sdk.rest.response.SymbolResponse;
 import innui.ref;
 import static innui.kucoin_sdk.kucoin_sdks.k_ejecutar_estrategia_l_s_1_margen_2_identificador;
 import static innui.kucoin_sdk.kucoin_sdks.k_importe_maximo;
-import static innui.kucoin_sdk.kucoin_sdks.k_margin;
 import static innui.kucoin_sdk.kucoin_sdks.k_pareja_simbolos;
 import static innui.kucoin_sdk.kucoin_sdks.k_ratio_subida;
 import innui.modelos.errores.oks;
@@ -34,6 +33,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import static innui.kucoin_sdk.kucoin_sdks.k_margen;
+import static innui.kucoin_sdk.kucoin_sdks.k_no_prestamo_si_hay;
 
 /**
  *
@@ -62,9 +63,9 @@ public class kucoin_sdksTest {
     
     public boolean iniciar(kucoin_sdks kucoin_sdk, oks ok, Object ... extras_array) throws Exception {
         ok.es = kucoin_sdk.iniciar(ok);
-        kucoin_sdk.modelo.clave = "????????????????????????";
-        kucoin_sdk.modelo.secreto = "????????-????-????-????-????????????";
-        kucoin_sdk.modelo.contraseña = "??????????????????";
+        kucoin_sdk.modelo.clave = "63139fc92b968a000153da04";
+        kucoin_sdk.modelo.secreto = "79904964-6e13-4a61-a7c5-ad7a45f7642f";
+        kucoin_sdk.modelo.contraseña = "sandbox.kucoin.com";
         return ok.es;
     }
     
@@ -198,7 +199,7 @@ public class kucoin_sdksTest {
     public void testListar_simbolos_4args() throws Exception {
         System.out.println("listar_simbolos");
         String moneda = "BTC";
-        String mercado = k_margin;
+        String mercado = k_margen;
         oks ok = new oks();
         Object[] extra_array = null;
         kucoin_sdks instance = new kucoin_sdks();
@@ -224,7 +225,7 @@ public class kucoin_sdksTest {
     public void testBuscar_par() throws Exception {
         System.out.println("buscar_par");
         String par = "BTC-USDT";
-        String mercado = k_margin;
+        String mercado = k_margen;
         oks ok = new oks();
         Object[] extra_array = null;
         kucoin_sdks instance = new kucoin_sdks();
@@ -318,7 +319,7 @@ public class kucoin_sdksTest {
         assertNotNull(result);
         datos_mapa.putAll(result);
         datos_mapa.put(k_ratio_subida, BigDecimal.valueOf(1));
-        result = instance.ejecutar_estrategia_l_s_1_margen_2(datos_mapa, ok, extra_array);
+        result = instance.ejecutar_estrategia_l_s_1_margen_2(k_no_prestamo_si_hay, datos_mapa, ok, extra_array);
         System.out.println("Identificador: " + result.get(k_ejecutar_estrategia_l_s_1_margen_2_identificador));        
         assertNotNull(result);
     }

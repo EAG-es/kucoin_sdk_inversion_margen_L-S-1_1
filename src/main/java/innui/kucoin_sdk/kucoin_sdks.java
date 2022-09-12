@@ -61,7 +61,7 @@ public class kucoin_sdks extends bases {
         // Ejemplo: "63139fc92b968a000153da04", "79904964-6e13-4a61-a7c5-ad7a45f7642f", "sandbox.kucoin.com"    
     }
     public static String k_in_ruta = "in/innui/kucoin_sdk/in";  //NOI18N    
-    public static String k_margin="k_margin";
+    public static String k_margen="k_margen";
     public static String k_pareja_simbolos = "k_pareja_simbolos";
     public static String k_importe_maximo = "k_importe_maximo";
     public static int k_7_dias = 7;    
@@ -112,10 +112,11 @@ public class kucoin_sdks extends bases {
     public static String k_consultar_orden_pendiente = "consultar_orden_pendiente";
     public static String k_comprobar_estrategia_l_s_1_resultado_subida = "comprobar_estrategia_l_s_1_resultado_subida";
     public static String k_comprobar_estrategia_l_s_1_resultado_bajada = "comprobar_estrategia_l_s_1_resultado_bajada";
-    public static String k_comprobar_estrategia_l_s_1_es_bajada_terminada = "k_comprobar_estrategia_l_s_1_es_bajada_terminada";
-    public static String k_comprobar_estrategia_l_s_1_es_subida_terminada = "k_comprobar_estrategia_l_s_1_es_subida_terminada";
+    public static String k_comprobar_estrategia_l_s_1_es_bajada_terminada = "comprobar_estrategia_l_s_1_es_bajada_terminada";
+    public static String k_comprobar_estrategia_l_s_1_es_subida_terminada = "comprobar_estrategia_l_s_1_es_subida_terminada";
+    public static String k_no_prestamo_si_hay = "no_prestamo_si_hay";
     public static BigDecimal k_maximo_ratio_endeudamiento_margen_por_defecto = BigDecimal.valueOf(0.5); // Ratio entre 0 - 1 que se permite de endeudamiento 
-    public static BigDecimal K_porcentaje_a_invertir = BigDecimal.valueOf(0.96);
+    public static BigDecimal K_porcentaje_a_invertir = BigDecimal.valueOf(0.98);
     public modelos modelo;
     public KucoinClientBuilder _kucoinClientBuilder;
     public KucoinRestClient _kucoinRestClient;
@@ -297,7 +298,7 @@ public class kucoin_sdks extends bases {
                     } 
                 }
                 if (es) {
-                    if (mercado.equals(k_margin)) {
+                    if (mercado.equals(k_margen)) {
                         if (symbolResponse.getIsMarginEnabled()) {
                             symbolResponse_resultado_list.add(symbolResponse);
                         }
@@ -371,7 +372,7 @@ public class kucoin_sdks extends bases {
                     es = true;
                 }
                 if (es) {
-                    if (mercado.equals(k_margin)) {
+                    if (mercado.equals(k_margen)) {
                         if (symbolResponse.getIsMarginEnabled()) {
                             symbolResponse_resultado_list.add(symbolResponse);
                         }
@@ -574,16 +575,6 @@ public class kucoin_sdks extends bases {
                             ok_local.setTxt(ok_local.getTxt(), simbolo_base + " " + tr.in(in, "Error: Solicita más cantidad de la que se le presta: ")
                                 + maxBorrowSize.toPlainString());
                         }
-                        liability = liability.add(cantidad_base);
-                        ratio_deuda = divide_0(liability, totalBalance, ok, 2, mathContext.getRoundingMode());
-                        if (ok.es) {
-                            if (ratio_deuda.compareTo(ratio_deuda_maximo) > 0) {
-                                ok_local.setTxt(ok_local.getTxt(), simbolo_base + " " + tr.in(in, "Error: máximo ratio de endeudamiento superado si se realiza el préstamo: ")
-                                    + ratio_deuda_maximo.toPlainString());
-                            }
-                        } else {
-                            ok.es = true;
-                        }
                     } else {
                         mapa_retorno.put(k_maximo_prestable_contra, maxBorrowSize);
                         mapa_retorno.put(k_total_deudas_contra, liability);
@@ -591,16 +582,6 @@ public class kucoin_sdks extends bases {
                         if (cantidad_contra.compareTo(maxBorrowSize) >= 0) {
                             ok_local.setTxt(ok_local.getTxt(), simbolo_contra + " " + tr.in(in, "Error: Solicita más cantidad de la que se le presta: ")
                                 + maxBorrowSize.toPlainString());
-                        }
-                        liability = liability.add(cantidad_contra);
-                        ratio_deuda = divide_0(liability, totalBalance, ok, 2, mathContext.getRoundingMode());
-                        if (ok.es) {
-                            if (ratio_deuda.compareTo(ratio_deuda_maximo) > 0) {
-                                ok_local.setTxt(ok_local.getTxt(), simbolo_contra + " " + tr.in(in, "Error: máximo ratio de endeudamiento superado si se realiza el préstamo: ")
-                                    + ratio_deuda_maximo.toPlainString());
-                            }
-                        } else {
-                            ok.es = true;
                         }
                     }
                 }
@@ -619,7 +600,7 @@ public class kucoin_sdks extends bases {
      * @return mapa con los resultados, o null
      * @throws Exception Opción de notificar errores de excepción
      */
-    public Map<String, Object> ejecutar_estrategia_l_s_1_margen_2(Map<String, Object> datos_mapa, oks ok, Object ... extra_array) throws Exception {
+    public Map<String, Object> ejecutar_estrategia_l_s_1_margen_2(String modo, Map<String, Object> datos_mapa, oks ok, Object ... extra_array) throws Exception {
         try {
             if (ok.es == false) { return null; }
             Map<String, Object> mapa_retorno = null;
@@ -639,6 +620,13 @@ public class kucoin_sdks extends bases {
             BigDecimal cantidad_contra = null;
             BigDecimal cantidad_base_prestada = null;
             BigDecimal cantidad_contra_prestada = null;
+            BigDecimal bigDecimal = null;
+            BigDecimal total_balance_base = null;
+            BigDecimal total_balance_contra = null;
+            BigDecimal parte_ya_hay_base = null;
+            BigDecimal parte_ya_hay_contra = null;
+            boolean es_prestamo_base = false;
+            boolean es_prestamo_contra = false;
             ref<BigDecimal> ref_BigDecimal = new ref<>();
             BorrowResponse prestamo_base_borrowResponse = null;
             BorrowResponse prestamo_contra_borrowResponse = null;
@@ -670,22 +658,67 @@ public class kucoin_sdks extends bases {
             simbolo_contra = (String) datos_mapa.get(k_simbolo_contra);
             cantidad_base = (BigDecimal) datos_mapa.get(k_cantidad_base);
             cantidad_contra = (BigDecimal) datos_mapa.get(k_cantidad_contra);
-            ref_BigDecimal.set(cantidad_base);
-            prestamo_base_borrowResponse = pedir_prestamo_7_dias(simbolo_base, ref_BigDecimal, ok);
-            ok.no_nul(prestamo_base_borrowResponse);
-            if (ok.es == false) {
-                ok.setTxt(tr.in(in, "Error al pedir préstamo de moneda base. "), ok.getTxt());
+            parte_ya_hay_base = BigDecimal.ZERO;
+            if (modo.equals(k_no_prestamo_si_hay)) {
+                total_balance_base = (BigDecimal) datos_mapa.get(k_total_balance_base);
+                if (total_balance_base.compareTo(cantidad_base) < 0) {
+                    parte_ya_hay_base = total_balance_base;
+                    bigDecimal = cantidad_base.subtract(total_balance_base, mathContext);
+                    ref_BigDecimal.set(bigDecimal);
+                    es_prestamo_base = true;
+                } else {
+                    es_prestamo_base = false;
+                }
+            } else {
+                ref_BigDecimal.set(cantidad_base);
+                es_prestamo_base = true;
             }
-            if (ok.es == false) { return null; }
-            cantidad_base = ref_BigDecimal.get();
-            ref_BigDecimal.set(cantidad_contra);
-            prestamo_contra_borrowResponse = pedir_prestamo_7_dias(simbolo_contra, ref_BigDecimal, ok);
-            if (ok.es == false) {
-                ok.setTxt(tr.in(in, "Error al pedir préstamo de moneda de contrapartida. "), ok.getTxt());
+            if (es_prestamo_base) {
+                prestamo_base_borrowResponse = pedir_prestamo_7_dias(simbolo_base, ref_BigDecimal, ok);
+                cantidad_base = ref_BigDecimal.get();
+                ok.no_nul(prestamo_base_borrowResponse);
+                if (ok.es == false) {
+                    if (cantidad_base.compareTo(BigDecimal.ZERO) > 0) {
+                        ok.setTxt(tr.in(in, "Error al pedir préstamo de moneda base. "), ok.getTxt());
+                    } else {
+                        ok.es = true;
+                    }                    
+                }
+                if (ok.es == false) { return null; }
+                cantidad_base = cantidad_base.add(parte_ya_hay_base, mathContext);
             }
-            if (ok.es == false) { return null; }
-            cantidad_contra = ref_BigDecimal.get();
+            parte_ya_hay_contra = BigDecimal.ZERO;
+            if (modo.equals(k_no_prestamo_si_hay)) {
+                total_balance_contra = (BigDecimal) datos_mapa.get(k_total_balance_contra);
+                if (total_balance_contra.compareTo(cantidad_contra) < 0) {
+                    parte_ya_hay_contra = total_balance_contra;
+                    bigDecimal = cantidad_contra.subtract(total_balance_contra, mathContext);
+                    ref_BigDecimal.set(bigDecimal);
+                    es_prestamo_contra = true;
+                } else {
+                    es_prestamo_contra = false;
+                }
+            } else {
+                ref_BigDecimal.set(cantidad_contra);
+                es_prestamo_contra = true;
+            }
+            if (es_prestamo_contra) {
+                prestamo_contra_borrowResponse = pedir_prestamo_7_dias(simbolo_contra, ref_BigDecimal, ok);
+                cantidad_contra = ref_BigDecimal.get();
+                ok.no_nul(prestamo_base_borrowResponse);
+                if (ok.es == false) {
+                    if (cantidad_contra.compareTo(BigDecimal.ZERO) > 0) {
+                        ok.setTxt(tr.in(in, "Error al pedir préstamo de moneda de contrapartida. "), ok.getTxt());
+                    } else {
+                        ok.es = true;
+                    }
+                }
+                if (ok.es == false) { return null; }
+                cantidad_contra = cantidad_contra.add(parte_ya_hay_contra, mathContext);
+            }
             cantidad_base = cantidad_base.multiply(K_porcentaje_a_invertir, mathContext);
+            cantidad_base = divide_0(cantidad_base, BigDecimal.ONE.add(ratio_subida), ok, mathContext);
+            if (ok.es == false) { return null; }
             mapa_retorno = new HashMap<>();
             pareja_simbolos = (String) datos_mapa.get(k_pareja_simbolos);
             pareja_simbolos = pareja_simbolos.toUpperCase();
@@ -713,18 +746,22 @@ public class kucoin_sdks extends bases {
             cotizacion_base_bajada = ref_BigDecimal.get();
             mapa_retorno.put(k_orden_compra_bajada_cantidad, cantidad_base);
             mapa_retorno.put(k_orden_compra_bajada_cotizacion, cotizacion_base_bajada);
-            borrowQueryResponse_contra = consultar_prestamo(prestamo_contra_borrowResponse, ok);
-            if (ok.es == false) { return null; }
-            mapa_retorno.put(k_prestamo_obtenido_contra, borrowQueryResponse_contra.getFilled());
-            if (borrowQueryResponse_contra.getFilled().compareTo(borrowQueryResponse_contra.getSize()) < 0) {
-                ok_local.setTxt(ok_local.getTxt(), tr.in(in, "La cantidad de contraprestación pedida prestada es mayor que la cantidad prestada. "));
-            }
-            if (ok.es == false) { return null; }
-            cantidad_contra_prestada = borrowQueryResponse_contra.getFilled();
-            cantidad_contra_prestada = cantidad_contra_prestada.multiply(cotizacion_contra, mathContext);
-            cantidad_contra_prestada = divide_0(cantidad_contra_prestada, cotizacion_base, ok, mathContext.getPrecision(), mathContext.getRoundingMode());
-            cantidad_contra_prestada = cantidad_contra_prestada.multiply(K_porcentaje_a_invertir, mathContext);
-            if (cantidad_contra_prestada.compareTo(cantidad_base) > 0) {
+            if (borrowQueryResponse_contra != null) {
+                borrowQueryResponse_contra = consultar_prestamo(prestamo_contra_borrowResponse, ok);
+                if (ok.es == false) { return null; }
+                mapa_retorno.put(k_prestamo_obtenido_contra, borrowQueryResponse_contra.getFilled());
+                if (borrowQueryResponse_contra.getFilled().compareTo(borrowQueryResponse_contra.getSize()) < 0) {
+                    ok_local.setTxt(ok_local.getTxt(), tr.in(in, "La cantidad de contraprestación pedida prestada es mayor que la cantidad prestada. "));
+                }
+                if (ok.es == false) { return null; }
+                cantidad_contra_prestada = borrowQueryResponse_contra.getFilled();
+                cantidad_contra_prestada = cantidad_contra_prestada.multiply(cotizacion_contra, mathContext);
+                cantidad_contra_prestada = divide_0(cantidad_contra_prestada, cotizacion_base, ok, mathContext.getPrecision(), mathContext.getRoundingMode());
+                cantidad_contra_prestada = cantidad_contra_prestada.multiply(K_porcentaje_a_invertir, mathContext);
+                if (cantidad_contra_prestada.compareTo(cantidad_base) > 0) {
+                    cantidad_contra_prestada = cantidad_base;
+                }
+            } else {
                 cantidad_contra_prestada = cantidad_base;
             }
             ref_BigDecimal.set(cotizacion_base_subida_mitad);
@@ -739,15 +776,19 @@ public class kucoin_sdks extends bases {
             cotizacion_base_subida_mitad = ref_BigDecimal.get();
             mapa_retorno.put(k_orden_compra_subida_mitad_cantidad, cantidad_contra_prestada);
             mapa_retorno.put(k_orden_compra_subida_mitad_cotizacion, cotizacion_base_subida_mitad);
-            borrowQueryResponse_base = consultar_prestamo(prestamo_base_borrowResponse, ok);
-            mapa_retorno.put(k_prestamo_obtenido_base, borrowQueryResponse_base.getFilled());
-            if (borrowQueryResponse_base.getFilled().compareTo(borrowQueryResponse_base.getSize()) < 0) {
-                ok_local.setTxt(ok_local.getTxt(), tr.in(in, "La cantidad base pedida prestada es mayor que la cantidad prestada. "));
-            }
-            if (ok.es == false) { return null; }
-            cantidad_base_prestada = borrowQueryResponse_base.getFilled();
-            cantidad_base_prestada = cantidad_base_prestada.multiply(K_porcentaje_a_invertir, mathContext);
-            if (cantidad_base_prestada.compareTo(cantidad_base) > 0) {
+            if (borrowQueryResponse_base != null) {
+                borrowQueryResponse_base = consultar_prestamo(prestamo_base_borrowResponse, ok);
+                mapa_retorno.put(k_prestamo_obtenido_base, borrowQueryResponse_base.getFilled());
+                if (borrowQueryResponse_base.getFilled().compareTo(borrowQueryResponse_base.getSize()) < 0) {
+                    ok_local.setTxt(ok_local.getTxt(), tr.in(in, "La cantidad base pedida prestada es mayor que la cantidad prestada. "));
+                }
+                if (ok.es == false) { return null; }
+                cantidad_base_prestada = borrowQueryResponse_base.getFilled();
+                cantidad_base_prestada = cantidad_base_prestada.multiply(K_porcentaje_a_invertir, mathContext);
+                if (cantidad_base_prestada.compareTo(cantidad_base) > 0) {
+                    cantidad_base_prestada = cantidad_base;
+                }
+            } else {
                 cantidad_base_prestada = cantidad_base;
             }
             ref_BigDecimal.set(cotizacion_base_bajada_mitad);
@@ -762,9 +803,18 @@ public class kucoin_sdks extends bases {
             cotizacion_base_bajada_mitad = ref_BigDecimal.get();
             mapa_retorno.put(k_orden_venta_bajada_mitad_cantidad, cantidad_base_prestada);
             mapa_retorno.put(k_orden_venta_bajada_mitad_cotizacion, cotizacion_base_bajada_mitad);
-            identificador = identificador + pareja_simbolos + ", "
-                    + prestamo_base_borrowResponse.getOrderId()+ ", "
-                    + prestamo_contra_borrowResponse.getOrderId()+ ", "
+            identificador = identificador + pareja_simbolos + ", ";
+            if (prestamo_base_borrowResponse != null) {
+                identificador = identificador + prestamo_base_borrowResponse.getOrderId() + ", ";
+            } else {
+                identificador = identificador + "" + ", ";
+            }
+            if (prestamo_contra_borrowResponse != null) {
+                identificador = identificador + prestamo_contra_borrowResponse.getOrderId() + ", ";
+            } else {
+                identificador = identificador + "" + ", ";
+            }
+            identificador = identificador
                     + k_ovs + ", " + orden_venta_subida.getOrderId() + ", "
                     + k_ocb + ", " + orden_compra_bajada.getOrderId() + ", "
                     + k_ovbm + ", " + orden_venta_bajada_mitad.getOrderId() + ", "
@@ -820,8 +870,16 @@ public class kucoin_sdks extends bases {
                     break;
                 } catch (KucoinApiException e) {
                     if (e.getCode().equals("400100")) {
-                        if (e.getMessage().contains("precision")) {
+                        if (e.getMessage().contains("increment")
+                          || e.getMessage().contains("precision")
+                          || e.getMessage().contains("must")) {
+                            if ((ref_cantidad.get()).compareTo(BigDecimal.ZERO) <= 0) {
+                                break;
+                            }
                             ref_cantidad.set(BigDecimals.quitar_decimales(ref_cantidad.get(), 1, ok));
+                        } else {
+                            ok.setTxt("Error de excepción. ", e);
+                            break;
                         }
                     } else {
                         ok.setTxt("Error de excepción. ", e);
@@ -957,8 +1015,16 @@ public class kucoin_sdks extends bases {
                     break;
                 } catch (KucoinApiException e) {
                     if (e.getCode().equals("400100")) {
-                        if (e.getMessage().contains("increment")) {
+                        if (e.getMessage().contains("increment")
+                          || e.getMessage().contains("precision")
+                          || e.getMessage().contains("must")) {
+                            if ((ref_cotizacion_base.get()).compareTo(BigDecimal.ZERO) <= 0) {
+                                break;
+                            }
                             ref_cotizacion_base.set(BigDecimals.quitar_decimales(ref_cotizacion_base.get(), 1, ok));
+                        } else {
+                            ok.setTxt("Error de excepción. ", e);
+                            break;
                         }
                     } else {
                         ok.setTxt("Error de excepción. ", e);
@@ -1056,7 +1122,17 @@ public class kucoin_sdks extends bases {
                     break;
                 } catch (KucoinApiException e) {
                     if (e.getCode().equals("400100")) {
-                        ref_cotizacion_base.set(BigDecimals.quitar_decimales(ref_cotizacion_base.get(), 1, ok));
+                        if (e.getMessage().contains("increment")
+                          || e.getMessage().contains("precision")
+                          || e.getMessage().contains("must")) {
+                            if ((ref_cotizacion_base.get()).compareTo(BigDecimal.ZERO) <= 0) {
+                                break;
+                            }
+                            ref_cotizacion_base.set(BigDecimals.quitar_decimales(ref_cotizacion_base.get(), 1, ok));
+                        } else {
+                            ok.setTxt("Error de excepción. ", e);
+                            break;
+                        }
                     } else {
                         ok.setTxt("Error de excepción. ", e);
                         break;
@@ -1129,22 +1205,25 @@ public class kucoin_sdks extends bases {
             identificador_array = identificador.split(", ");
             pareja_simbolos = identificador_array[0].trim();
             prestamo_base_id = identificador_array[1].trim();
-            if (ok.es == false) { return null; }
             prestamo_contra_id = identificador_array[2].trim();
             mapa = consultar_prestamos_base_contra(prestamo_base_id, prestamo_contra_id, ok);
             if (ok.es == false) { return null; }
             resultados_mapa.putAll(mapa);
             prestamo_base_cantidad = (BigDecimal) mapa.get(k_consulta_prestamo_importe_base);
+            prestamo_base_cantidad = BigDecimals.nulo_es_0(prestamo_base_cantidad);
             prestamo_contra_cantidad = (BigDecimal) mapa.get(k_consulta_prestamo_importe_contra);
+            prestamo_contra_cantidad = BigDecimals.nulo_es_0(prestamo_contra_cantidad);
             ok.es = k_ovs.equals(identificador_array[3].trim());
             if (ok.es == false) { return null; }
             orden_venta_subida_id = identificador_array[4].trim();
             mapa = consultar_orden_stop_limit(orden_venta_subida_id, ok);
             if (ok.es == false) { return null; }
             orden_venta_subida_origen_importe = (BigDecimal) mapa.get(k_consultar_orden_origen_resultado);
+            orden_venta_subida_origen_importe = BigDecimals.nulo_es_0(orden_venta_subida_origen_importe);
             orden_venta_subida_cantidad = (BigDecimal) mapa.get(k_consultar_orden_resultado);
+            orden_venta_subida_cantidad = BigDecimals.nulo_es_0(orden_venta_subida_cantidad);
             bigDecimal = (BigDecimal) mapa.get(k_consultar_orden_pendiente);
-            es_subida_terminada = bigDecimal.compareTo(BigDecimal.ZERO) <= 0;
+            es_subida_terminada = bigDecimal != null && bigDecimal.compareTo(BigDecimal.ZERO) <= 0;
             resultados_mapa.put(k_ovs, mapa);
             ok.es = k_ocb.equals(identificador_array[5].trim()); 
             if (ok.es == false) { return null; }
@@ -1152,8 +1231,11 @@ public class kucoin_sdks extends bases {
             mapa = consultar_orden_stop_limit(orden_compra_bajada_id, ok);
             if (ok.es == false) { return null; }
             orden_compra_bajada_origen_importe = (BigDecimal) mapa.get(k_consultar_orden_origen_resultado);
+            orden_compra_bajada_origen_importe = BigDecimals.nulo_es_0(orden_compra_bajada_origen_importe);
             orden_compra_bajada_cantidad = (BigDecimal) mapa.get(k_consultar_orden_resultado);
-            es_bajada_terminada = bigDecimal.compareTo(BigDecimal.ZERO) <= 0;
+            orden_compra_bajada_cantidad = BigDecimals.nulo_es_0(orden_compra_bajada_cantidad);
+            bigDecimal = (BigDecimal) mapa.get(k_consultar_orden_pendiente);
+            es_bajada_terminada = bigDecimal != null && bigDecimal.compareTo(BigDecimal.ZERO) <= 0;
             resultados_mapa.put(k_ocb, mapa);
             ok.es = k_ovbm.equals(identificador_array[7].trim());
             if (ok.es == false) { return null; }
@@ -1161,9 +1243,11 @@ public class kucoin_sdks extends bases {
             mapa = consultar_orden_stop_limit(orden_venta_bajada_mitad_id, ok);
             if (ok.es == false) { return null; }
             orden_venta_bajada_mitad_origen_importe = (BigDecimal) mapa.get(k_consultar_orden_origen_resultado);
+            orden_venta_bajada_mitad_origen_importe = BigDecimals.nulo_es_0(orden_venta_bajada_mitad_origen_importe);
             orden_venta_bajada_mitad_cantidad = (BigDecimal) mapa.get(k_consultar_orden_resultado);
+            orden_venta_bajada_mitad_cantidad = BigDecimals.nulo_es_0(orden_venta_bajada_mitad_cantidad);
             bigDecimal = (BigDecimal) mapa.get(k_consultar_orden_pendiente);
-            es_bajada_terminada = bigDecimal.compareTo(BigDecimal.ZERO) <= 0;
+            es_bajada_terminada = es_bajada_terminada && bigDecimal != null && bigDecimal.compareTo(BigDecimal.ZERO) <= 0;
             resultados_mapa.put(k_ovbm, mapa);
             ok.es = k_ocsm.equals(identificador_array[9].trim());
             if (ok.es == false) { return null; }
@@ -1171,9 +1255,11 @@ public class kucoin_sdks extends bases {
             mapa = consultar_orden_stop_limit(orden_compra_subida_mitad_id, ok);
             if (ok.es == false) { return null; }
             orden_compra_subida_mitad_origen_importe = (BigDecimal) mapa.get(k_consultar_orden_origen_resultado);
+            orden_compra_subida_mitad_origen_importe = BigDecimals.nulo_es_0(orden_compra_subida_mitad_origen_importe);
             orden_compra_subida_mitad_cantidad = (BigDecimal) mapa.get(k_consultar_orden_resultado);
+            orden_compra_subida_mitad_cantidad = BigDecimals.nulo_es_0(orden_compra_subida_mitad_cantidad);
             bigDecimal = (BigDecimal) mapa.get(k_consultar_orden_pendiente);
-            es_subida_terminada = bigDecimal.compareTo(BigDecimal.ZERO) <= 0;
+            es_subida_terminada = es_subida_terminada && bigDecimal != null && bigDecimal.compareTo(BigDecimal.ZERO) <= 0;
             resultados_mapa.put(k_ocsm, mapa);
             subida_resultado = nulo_es_0(orden_venta_subida_cantidad)
                     .subtract(nulo_es_0(orden_compra_subida_mitad_origen_importe), mathContext);
@@ -1211,20 +1297,24 @@ public class kucoin_sdks extends bases {
             BigDecimal importe_contra = null;
             BigDecimal pendiente_repago_base = null;
             BigDecimal pendiente_repago_contra = null;
-            borrowQueryResponse_base = _kucoinRestClient.loanAPI().queryBorrow(id_base);
-            ok.no_nul(borrowQueryResponse_base);
-            if (ok.es == false) { return null; }
-            simbolo_base = borrowQueryResponse_base.getCurrency();
-            retorno_mapa.put(k_consulta_prestamo_simbolo_base, simbolo_base);
-            importe_base = borrowQueryResponse_base.getFilled();
-            retorno_mapa.put(k_consulta_prestamo_importe_base, importe_base);
-            borrowQueryResponse_contra = _kucoinRestClient.loanAPI().queryBorrow(id_contra);
-            ok.no_nul(borrowQueryResponse_contra);
-            if (ok.es == false) { return null; }
-            simbolo_contra = borrowQueryResponse_contra.getCurrency();
-            retorno_mapa.put(k_consulta_prestamo_simbolo_contra, simbolo_contra);
-            importe_contra = borrowQueryResponse_contra.getFilled();
-            retorno_mapa.put(k_consulta_prestamo_importe_contra, importe_contra);
+            if (id_base.isBlank() == false) {
+                borrowQueryResponse_base = _kucoinRestClient.loanAPI().queryBorrow(id_base);
+                ok.no_nul(borrowQueryResponse_base);
+                if (ok.es == false) { return null; }
+                simbolo_base = borrowQueryResponse_base.getCurrency();
+                retorno_mapa.put(k_consulta_prestamo_simbolo_base, simbolo_base);
+                importe_base = borrowQueryResponse_base.getFilled();
+                retorno_mapa.put(k_consulta_prestamo_importe_base, importe_base);
+            }
+            if (id_contra.isBlank() == false) {
+                borrowQueryResponse_contra = _kucoinRestClient.loanAPI().queryBorrow(id_contra);
+                ok.no_nul(borrowQueryResponse_contra);
+                if (ok.es == false) { return null; }
+                simbolo_contra = borrowQueryResponse_contra.getCurrency();
+                retorno_mapa.put(k_consulta_prestamo_simbolo_contra, simbolo_contra);
+                importe_contra = borrowQueryResponse_contra.getFilled();
+                retorno_mapa.put(k_consulta_prestamo_importe_contra, importe_contra);
+            }
             marginAccountResponse = consultar_cuenta_margen(ok);
             ok.no_nul(marginAccountResponse);
             if (ok.es == false) { return null; }
@@ -1283,7 +1373,7 @@ public class kucoin_sdks extends bases {
                         retorno_mapa.put(k_consultar_orden_pendiente
                                 , importe_en_operacion.subtract(importe_ejecutado));
                     }
-                }
+                } 
             } else {
                 ok.es = true;
                 retorno_mapa = consultar_orden(id, ok);

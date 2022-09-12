@@ -28,7 +28,6 @@ import static innui.kucoin_sdk.kucoin_sdks.k_importe_base;
 import static innui.kucoin_sdk.kucoin_sdks.k_importe_contra;
 import static innui.kucoin_sdk.kucoin_sdks.k_importe_maximo;
 import static innui.kucoin_sdk.kucoin_sdks.k_importe_mitad_ratio;
-import static innui.kucoin_sdk.kucoin_sdks.k_margin;
 import static innui.kucoin_sdk.kucoin_sdks.k_maximo_prestable_base;
 import static innui.kucoin_sdk.kucoin_sdks.k_maximo_prestable_contra;
 import static innui.kucoin_sdk.kucoin_sdks.k_maximo_ratio_endeudamiento_margen;
@@ -59,15 +58,16 @@ import innui.modelos.configuraciones.ResourceBundles;
 import innui.modelos.configuraciones.iniciales;
 import innui.modelos.errores.oks;
 import innui.modelos.internacionalizacion.tr;
-import static java.lang.System.err;
 import static java.lang.System.exit;
-import static java.lang.System.out;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 import static innui.kucoin_sdk.kucoin_sdks.k_comprobar_estrategia_l_s_1_resultado_subida;
 import static innui.kucoin_sdk.kucoin_sdks.k_comprobar_estrategia_l_s_1_resultado_bajada;
+import static innui.kucoin_sdk.kucoin_sdks.k_margen;
+import static innui.kucoin_sdk.kucoin_sdks.k_no_prestamo_si_hay;
+import innui.utiles.bigdecimals.BigDecimals;
 // Probar logger
 //import innui.modelos.errores.Strings_max_Handler;
 //import static innui.modelos.errores.Strings_max_Handler.extraer;
@@ -185,11 +185,11 @@ public class inversion_margen_L_S_1s extends bases {
             } else if (opcion.equals("7")) {
                 kucoin_sdk.listar_simbolos("USDC", null, ok);
             } else if (opcion.equals("8")) {
-                kucoin_sdk.listar_simbolos("BTC", k_margin, ok);
+                kucoin_sdk.listar_simbolos("BTC", k_margen, ok);
             } else if (opcion.equals("9")) {
-                kucoin_sdk.listar_simbolos("USDT", k_margin, ok);
+                kucoin_sdk.listar_simbolos("USDT", k_margen, ok);
             } else if (opcion.equals("a")) {
-                kucoin_sdk.listar_simbolos("USDC", k_margin, ok);
+                kucoin_sdk.listar_simbolos("USDC", k_margen, ok);
             } else if (opcion.equals("b")) {
                 ver_pantalla_estrategia_l_s_1_margen(ok);
             } else if (opcion.equals("c")) {
@@ -301,10 +301,11 @@ public class inversion_margen_L_S_1s extends bases {
         Map<String, Object> ejecutar_estrategia_mapa = null;
         try {
             texto = (String) datos_mapa.get(k_pareja_simbolos);
-            if (kucoin_sdk.buscar_par(texto.toUpperCase(), k_margin, ok) == null) {
+            if (kucoin_sdk.buscar_par(texto.toUpperCase(), k_margen, ok) == null) {
                 ok_local.setTxt("No se encuentra el par. ", ok_local.getTxt());
             }
             bigDecimal = (BigDecimal) datos_mapa.get(k_importe_maximo);
+            bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
             if (bigDecimal.intValue() <= 0) {
                 ok_local.setTxt("Importe no válido. ", ok.getTxt());
             }
@@ -326,24 +327,31 @@ public class inversion_margen_L_S_1s extends bases {
             escribir_linea(k_simbolo_contra + " = " + texto, ok);
             if (ok.es == false) { return 0; }
             bigDecimal = (BigDecimal) ejecutar_estrategia_mapa.get(k_importe_base);
+            bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
             escribir_linea(k_importe_base + " = " + bigDecimal.toPlainString() + " USD", ok);
             if (ok.es == false) { return 0; }
             bigDecimal = (BigDecimal) ejecutar_estrategia_mapa.get(k_importe_contra);
+            bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
             escribir_linea(k_importe_contra + " = " + bigDecimal.toPlainString() + " USD", ok);
             if (ok.es == false) { return 0; }
             bigDecimal = (BigDecimal) ejecutar_estrategia_mapa.get(k_importe_mitad_ratio);
+            bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
             escribir_linea(k_importe_mitad_ratio + " = " + bigDecimal.toPlainString() + " USD", ok);
             if (ok.es == false) { return 0; }
             bigDecimal = (BigDecimal) ejecutar_estrategia_mapa.get(k_cotizacion_base);
+            bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
             escribir_linea(k_cotizacion_base + " = " + bigDecimal.toPlainString() + " USD", ok);
             if (ok.es == false) { return 0; }
             bigDecimal = (BigDecimal) ejecutar_estrategia_mapa.get(k_cotizacion_contra);
+            bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
             escribir_linea(k_cotizacion_contra + " = " + bigDecimal.toPlainString() + " USD", ok);
             if (ok.es == false) { return 0; }
             bigDecimal = (BigDecimal) ejecutar_estrategia_mapa.get(k_cantidad_base);
+            bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
             escribir_linea(k_cantidad_base + " = " + bigDecimal.toPlainString() + " " + simbolo_base, ok);
             if (ok.es == false) { return 0; }
             bigDecimal = (BigDecimal) ejecutar_estrategia_mapa.get(k_cantidad_contra);
+            bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
             escribir_linea(k_cantidad_contra + " = " + bigDecimal.toPlainString() + " " + simbolo_contra, ok);
             if (ok.es == false) {
                 ok.setTxt(ok.getTxt(), "Error en los datos de la fase 1. ");
@@ -362,27 +370,35 @@ public class inversion_margen_L_S_1s extends bases {
             }
             if (ok.es == false) { return 0; }
             bigDecimal = (BigDecimal) ejecutar_estrategia_mapa.get(k_maximo_ratio_endeudamiento_margen);
+            bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
             escribir_linea(k_maximo_ratio_endeudamiento_margen + " = " + bigDecimal.toPlainString() + " (> 0, < 1) ", ok);
             if (ok.es == false) { return 0; }
             bigDecimal = (BigDecimal) ejecutar_estrategia_mapa.get(k_ratio_deuda_inicial);
+            bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
             escribir_linea(k_ratio_deuda_inicial + " = " + bigDecimal.toPlainString() + " (> 0, < 1) ", ok);
             if (ok.es == false) { return 0; }
             bigDecimal = (BigDecimal) ejecutar_estrategia_mapa.get(k_maximo_prestable_base);
+            bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
             escribir_linea(k_maximo_prestable_base + " = " + bigDecimal.toPlainString() + " " + simbolo_base, ok);
             if (ok.es == false) { return 0; }
             bigDecimal = (BigDecimal) ejecutar_estrategia_mapa.get(k_total_deudas_base);
+            bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
             escribir_linea(k_total_deudas_base + " = " + bigDecimal.toPlainString() + " " + simbolo_base, ok);
             if (ok.es == false) { return 0; }
             bigDecimal = (BigDecimal) ejecutar_estrategia_mapa.get(k_total_balance_base);
+            bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
             escribir_linea(k_total_balance_base + " = " + bigDecimal.toPlainString() + " " + simbolo_base, ok);
             if (ok.es == false) { return 0; }
             bigDecimal = (BigDecimal) ejecutar_estrategia_mapa.get(k_maximo_prestable_contra);
+            bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
             escribir_linea(k_maximo_prestable_contra + " = " + bigDecimal.toPlainString() + " " + simbolo_contra, ok);
             if (ok.es == false) { return 0; }
             bigDecimal = (BigDecimal) ejecutar_estrategia_mapa.get(k_total_deudas_contra);
+            bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
             escribir_linea(k_total_deudas_contra + " = " + bigDecimal.toPlainString() + " " + simbolo_contra, ok);
             if (ok.es == false) { return 0; }
             bigDecimal = (BigDecimal) ejecutar_estrategia_mapa.get(k_total_balance_contra);
+            bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
             escribir_linea(k_total_balance_contra + " = " + bigDecimal.toPlainString() + " " + simbolo_contra, ok);
             if (ok.es == false) { return 0; }
             ok.setTxt(ok_local.getTxt());
@@ -415,7 +431,7 @@ public class inversion_margen_L_S_1s extends bases {
                 ok.setTxt("Importe demasiado bajo. ", ok.getTxt());
             }
             if (ok.es == false) { return false; }
-            ejecutar_estrategia_mapa = kucoin_sdk.ejecutar_estrategia_l_s_1_margen_2(datos_mapa, ok);
+            ejecutar_estrategia_mapa = kucoin_sdk.ejecutar_estrategia_l_s_1_margen_2(k_no_prestamo_si_hay, datos_mapa, ok);
             if (ok.es == false) { return false; }
             datos_mapa.putAll(ejecutar_estrategia_mapa);
             texto = (String) datos_mapa.get(k_simbolo_base);
@@ -428,39 +444,51 @@ public class inversion_margen_L_S_1s extends bases {
             ok.no_nul(texto);
             if (ok.es == false) { return false; }
             bigDecimal = (BigDecimal) datos_mapa.get(k_cantidad_base);
+            bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
             escribir_linea(k_cantidad_base + " = " + bigDecimal.toPlainString() + " " + simbolo_base, ok);
             if (ok.es == false) { return false; }
             bigDecimal = (BigDecimal) datos_mapa.get(k_prestamo_obtenido_base);
+            bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
             escribir_linea(k_prestamo_obtenido_base + " = " + bigDecimal.toPlainString() + " " + simbolo_base, ok);
             if (ok.es == false) { return false; }
             bigDecimal = (BigDecimal) datos_mapa.get(k_cantidad_contra);
+            bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
             escribir_linea(k_cantidad_contra + " = " + bigDecimal.toPlainString() + " " + simbolo_contra, ok);
             if (ok.es == false) { return false; }
             bigDecimal = (BigDecimal) datos_mapa.get(k_prestamo_obtenido_contra);
+            bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
             escribir_linea(k_prestamo_obtenido_contra + " = " + bigDecimal.toPlainString() + " " + simbolo_contra, ok);
             if (ok.es == false) { return false; }
             bigDecimal = (BigDecimal) datos_mapa.get(k_orden_venta_subida_cantidad);
+            bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
             escribir_linea(k_orden_venta_subida_cantidad + " = " + bigDecimal.toPlainString() + " " + simbolo_base, ok);
             if (ok.es == false) { return false; }
             bigDecimal = (BigDecimal) datos_mapa.get(k_orden_venta_subida_cotizacion);
+            bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
             escribir_linea(k_orden_venta_subida_cotizacion + " = " + bigDecimal.toPlainString() + " USD", ok);
             if (ok.es == false) { return false; }
             bigDecimal = (BigDecimal) datos_mapa.get(k_orden_compra_subida_mitad_cantidad);
+            bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
             escribir_linea(k_orden_compra_subida_mitad_cantidad + " = " + bigDecimal.toPlainString() + " " + simbolo_base, ok);
             if (ok.es == false) { return false; }
             bigDecimal = (BigDecimal) datos_mapa.get(k_orden_compra_subida_mitad_cotizacion);
+            bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
             escribir_linea(k_orden_compra_subida_mitad_cotizacion + " = " + bigDecimal.toPlainString() + " USD", ok);
             if (ok.es == false) { return false; }
             bigDecimal = (BigDecimal) datos_mapa.get(k_orden_venta_bajada_mitad_cantidad);
+            bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
             escribir_linea(k_orden_venta_bajada_mitad_cantidad + " = " + bigDecimal.toPlainString() + " " + simbolo_base, ok);
             if (ok.es == false) { return false; }
             bigDecimal = (BigDecimal) datos_mapa.get(k_orden_venta_bajada_mitad_cotizacion);
+            bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
             escribir_linea(k_orden_venta_bajada_mitad_cotizacion + " = " + bigDecimal.toPlainString() + " USD", ok);
             if (ok.es == false) { return false; }
             bigDecimal = (BigDecimal) datos_mapa.get(k_orden_compra_bajada_cantidad);
+            bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
             escribir_linea(k_orden_compra_bajada_cantidad + " = " + bigDecimal.toPlainString() + " " + simbolo_base, ok);
             if (ok.es == false) { return false; }
             bigDecimal = (BigDecimal) datos_mapa.get(k_orden_compra_bajada_cotizacion);
+            bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
             escribir_linea(k_orden_compra_bajada_cotizacion + " = " + bigDecimal.toPlainString() + " USD", ok);
             if (ok.es == false) { return false; }
             texto = (String) datos_mapa.get(k_ejecutar_estrategia_l_s_1_margen_2_incidencias);
@@ -519,18 +547,22 @@ public class inversion_margen_L_S_1s extends bases {
                 escribir_linea(k_consulta_prestamo_simbolo_base + " = " + texto, ok);
                 if (ok.es == false) { continue; }
                 bigDecimal = (BigDecimal) resultado_mapa.get(k_consulta_prestamo_importe_base);
+                bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
                 escribir_linea(k_consulta_prestamo_importe_base + " = " + bigDecimal.toPlainString(), ok);
                 if (ok.es == false) { continue; }
                 bigDecimal = (BigDecimal) resultado_mapa.get(k_consulta_prestamo_pendiente_repago_base);
+                bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
                 escribir_linea(k_consulta_prestamo_pendiente_repago_base + " = " + bigDecimal.toPlainString(), ok);
                 if (ok.es == false) { continue; }
                 texto = (String) resultado_mapa.get(k_consulta_prestamo_simbolo_contra);
                 escribir_linea(k_consulta_prestamo_simbolo_contra + " = " + texto, ok);
                 if (ok.es == false) { continue; }
                 bigDecimal = (BigDecimal) resultado_mapa.get(k_consulta_prestamo_importe_contra);
+                bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
                 escribir_linea(k_consulta_prestamo_importe_contra + " = " + bigDecimal.toPlainString(), ok);
                 if (ok.es == false) { continue; }
                 bigDecimal = (BigDecimal) resultado_mapa.get(k_consulta_prestamo_pendiente_repago_contra);
+                bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
                 escribir_linea(k_consulta_prestamo_pendiente_repago_contra + " = " + bigDecimal.toPlainString(), ok);
                 if (ok.es == false) { continue; }
                 mapa = (Map<String, Object>) resultado_mapa.get(k_ovs);
@@ -544,9 +576,11 @@ public class inversion_margen_L_S_1s extends bases {
                 escribir_linea(k_consultar_orden_origen_resultado + " = " + nulo_es_0(bigDecimal).toPlainString(), ok);
                 if (ok.es == false) { continue; }
                 bigDecimal = (BigDecimal) mapa.get(k_consultar_orden_resultado);
+                bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
                 escribir_linea(k_consultar_orden_resultado + " = " + nulo_es_0(bigDecimal).toPlainString(), ok);
                 if (ok.es == false) { continue; }
                 bigDecimal = (BigDecimal) mapa.get(k_consultar_orden_pendiente);
+                bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
                 escribir_linea(k_consultar_orden_pendiente + " = " + nulo_es_0(bigDecimal).toPlainString(), ok);
                 if (ok.es == false) { continue; }
                 mapa = (Map<String, Object>) resultado_mapa.get(k_ocsm);
@@ -562,9 +596,11 @@ public class inversion_margen_L_S_1s extends bases {
                 escribir_linea(k_consultar_orden_origen_resultado + " = " + nulo_es_0(bigDecimal).toPlainString(), ok);
                 if (ok.es == false) { continue; }
                 bigDecimal = (BigDecimal) mapa.get(k_consultar_orden_resultado);
+                bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
                 escribir_linea(k_consultar_orden_resultado + " = " + nulo_es_0(bigDecimal).toPlainString(), ok);
                 if (ok.es == false) { continue; }
                 bigDecimal = (BigDecimal) mapa.get(k_consultar_orden_pendiente);
+                bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
                 escribir_linea(k_consultar_orden_pendiente + " = " + nulo_es_0(bigDecimal).toPlainString(), ok);
                 if (ok.es == false) { continue; }
                 mapa = (Map<String, Object>) resultado_mapa.get(k_ovbm);
@@ -578,9 +614,11 @@ public class inversion_margen_L_S_1s extends bases {
                 escribir_linea(k_consultar_orden_origen_resultado + " = " + nulo_es_0(bigDecimal).toPlainString(), ok);
                 if (ok.es == false) { continue; }
                 bigDecimal = (BigDecimal) mapa.get(k_consultar_orden_resultado);
+                bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
                 escribir_linea(k_consultar_orden_resultado + " = " + nulo_es_0(bigDecimal).toPlainString(), ok);
                 if (ok.es == false) { continue; }
                 bigDecimal = (BigDecimal) mapa.get(k_consultar_orden_pendiente);
+                bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
                 escribir_linea(k_consultar_orden_pendiente + " = " + nulo_es_0(bigDecimal).toPlainString(), ok);
                 if (ok.es == false) { continue; }
                 mapa = (Map<String, Object>) resultado_mapa.get(k_ocb);
@@ -594,9 +632,11 @@ public class inversion_margen_L_S_1s extends bases {
                 escribir_linea(k_consultar_orden_origen_resultado + " = " + nulo_es_0(bigDecimal).toPlainString(), ok);
                 if (ok.es == false) { continue; }
                 bigDecimal = (BigDecimal) mapa.get(k_consultar_orden_resultado);
+                bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
                 escribir_linea(k_consultar_orden_resultado + " = " + nulo_es_0(bigDecimal).toPlainString(), ok);
                 if (ok.es == false) { continue; }
                 bigDecimal = (BigDecimal) mapa.get(k_consultar_orden_pendiente);
+                bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
                 escribir_linea(k_consultar_orden_pendiente + " = " + nulo_es_0(bigDecimal).toPlainString(), ok);
                 if (ok.es == false) { continue; }
                 escribir_linea(" -------------------------------------------------------- ", ok);
@@ -604,11 +644,13 @@ public class inversion_margen_L_S_1s extends bases {
                 escribir_linea(k_comprobar_estrategia_l_s_1_es_subida_terminada + " = " + (boolean) resultado_mapa.get(k_comprobar_estrategia_l_s_1_es_subida_terminada), ok);
                 if (ok.es == false) { continue; }
                 bigDecimal = (BigDecimal) resultado_mapa.get(k_comprobar_estrategia_l_s_1_resultado_subida);
+                bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
                 escribir_linea(k_comprobar_estrategia_l_s_1_resultado_subida + " = " + nulo_es_0(bigDecimal).toPlainString(), ok);
                 if (ok.es == false) { continue; }
                 escribir_linea(k_comprobar_estrategia_l_s_1_es_bajada_terminada + " = " + (boolean) resultado_mapa.get(k_comprobar_estrategia_l_s_1_es_bajada_terminada), ok);
                 if (ok.es == false) { continue; }
                 bigDecimal = (BigDecimal) resultado_mapa.get(k_comprobar_estrategia_l_s_1_resultado_bajada);
+                bigDecimal = BigDecimals.nulo_es_0(bigDecimal);
                 escribir_linea(k_comprobar_estrategia_l_s_1_resultado_bajada + " = " + nulo_es_0(bigDecimal).toPlainString(), ok);
             }
             return ok.es;
