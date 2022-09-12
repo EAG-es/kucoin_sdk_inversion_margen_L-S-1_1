@@ -31,7 +31,6 @@ import static innui.utiles.bigdecimals.BigDecimals.nulo_es_0;
 import innui.modelos.configuraciones.ResourceBundles;
 import innui.modelos.errores.oks;
 import innui.modelos.internacionalizacion.tr;
-import static java.lang.System.out;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
@@ -116,7 +115,7 @@ public class kucoin_sdks extends bases {
     public static String k_comprobar_estrategia_l_s_1_es_bajada_terminada = "k_comprobar_estrategia_l_s_1_es_bajada_terminada";
     public static String k_comprobar_estrategia_l_s_1_es_subida_terminada = "k_comprobar_estrategia_l_s_1_es_subida_terminada";
     public static BigDecimal k_maximo_ratio_endeudamiento_margen_por_defecto = BigDecimal.valueOf(0.5); // Ratio entre 0 - 1 que se permite de endeudamiento 
-    public static BigDecimal K_porcentaje_a_invertir = BigDecimal.valueOf(0.99);
+    public static BigDecimal K_porcentaje_a_invertir = BigDecimal.valueOf(0.96);
     public modelos modelo;
     public KucoinClientBuilder _kucoinClientBuilder;
     public KucoinRestClient _kucoinRestClient;
@@ -152,7 +151,8 @@ public class kucoin_sdks extends bases {
                 _kucoinClientBuilder = _kucoinClientBuilder.withBaseUrl(modelos.k_url_base_sandbox_kucoin)
                     .withApiKey(modelo.clave, modelo.secreto, modelo.contraseña);
             } else {
-                _kucoinClientBuilder = _kucoinClientBuilder.withBaseUrl(modelos.k_url_base_kucoin);
+                _kucoinClientBuilder = _kucoinClientBuilder.withBaseUrl(modelos.k_url_base_kucoin)
+                    .withApiKey(modelo.clave, modelo.secreto, modelo.contraseña);
             }
             _kucoinRestClient  = _kucoinClientBuilder.buildRestClient();
             return ok.es;
@@ -660,8 +660,8 @@ public class kucoin_sdks extends bases {
             if (ok.es == false) { return null; }
             cotizacion_contra = (BigDecimal) datos_mapa.get(k_cotizacion_contra);
             cotizacion_base = (BigDecimal) datos_mapa.get(k_cotizacion_base);
-            cotizacion_base_subida_mitad = cotizacion_base.multiply(ratio_subida_mitad.add(BigDecimal.ONE));
-            cotizacion_base_subida = cotizacion_base.multiply(ratio_subida.add(BigDecimal.ONE));
+            cotizacion_base_subida_mitad = cotizacion_base.multiply(ratio_subida_mitad.add(BigDecimal.ONE), mathContext);
+            cotizacion_base_subida = cotizacion_base.multiply(ratio_subida.add(BigDecimal.ONE), mathContext);
             cotizacion_base_bajada_mitad = divide_0(cotizacion_base, ratio_subida_mitad.add(BigDecimal.ONE), ok, 4, mathContext.getRoundingMode());
             cotizacion_base_bajada = divide_0(cotizacion_base, ratio_subida.add(BigDecimal.ONE), ok, 4, mathContext.getRoundingMode());
             if (ok.es == false) { return null; }
@@ -721,7 +721,7 @@ public class kucoin_sdks extends bases {
             }
             if (ok.es == false) { return null; }
             cantidad_contra_prestada = borrowQueryResponse_contra.getFilled();
-            cantidad_contra_prestada = cantidad_contra_prestada.multiply(cotizacion_contra);
+            cantidad_contra_prestada = cantidad_contra_prestada.multiply(cotizacion_contra, mathContext);
             cantidad_contra_prestada = divide_0(cantidad_contra_prestada, cotizacion_base, ok, mathContext.getPrecision(), mathContext.getRoundingMode());
             cantidad_contra_prestada = cantidad_contra_prestada.multiply(K_porcentaje_a_invertir, mathContext);
             if (cantidad_contra_prestada.compareTo(cantidad_base) > 0) {
@@ -1259,6 +1259,8 @@ public class kucoin_sdks extends bases {
             BigDecimal precio_en_operacion = null;
             BigDecimal cantidad_en_operacion = null;
             BigDecimal importe_en_operacion = null;
+            MathContext mathContext;
+            mathContext = new MathContext(5, RoundingMode.HALF_UP);
             StopOrderResponse stopOrderResponse = _kucoinRestClient.stopOrderAPI().getStopOrder(id);
             ok.no_nul(stopOrderResponse);
             if (ok.es) {
@@ -1268,7 +1270,7 @@ public class kucoin_sdks extends bases {
                     cantidad_ejecutado = stopOrderResponse.getSize();
                     precio_en_operacion = stopOrderResponse.getPrice();
                     cantidad_en_operacion = stopOrderResponse.getSize();
-                    importe_en_operacion = cantidad_en_operacion.multiply(precio_en_operacion);
+                    importe_en_operacion = cantidad_en_operacion.multiply(precio_en_operacion, mathContext);
                     retorno_mapa.put(k_consultar_orden_stop_fecha_inicio, date);
                     if (stopOrderResponse.getSide().toLowerCase().equals("buy")) {
                         retorno_mapa.put(k_consultar_orden_origen_resultado, importe_ejecutado);
@@ -1309,6 +1311,8 @@ public class kucoin_sdks extends bases {
             BigDecimal precio_en_operacion = null;
             BigDecimal cantidad_en_operacion = null;
             BigDecimal importe_en_operacion = null;
+            MathContext mathContext;
+            mathContext = new MathContext(5, RoundingMode.HALF_UP);
             OrderResponse orderResponse = _kucoinRestClient.orderAPI().getOrder(id);
             ok.no_nul(orderResponse);
             if (ok.es == false) { return null; }
@@ -1318,7 +1322,7 @@ public class kucoin_sdks extends bases {
                 cantidad_ejecutado = orderResponse.getDealSize();
                 precio_en_operacion = orderResponse.getPrice();
                 cantidad_en_operacion = orderResponse.getSize();
-                importe_en_operacion = cantidad_en_operacion.multiply(precio_en_operacion);
+                importe_en_operacion = cantidad_en_operacion.multiply(precio_en_operacion, mathContext);
                 retorno_mapa.put(k_consultar_orden_es_trato, true);
                 if (orderResponse.getSide().toLowerCase().equals("buy")) {
                     retorno_mapa.put(k_consultar_orden_origen_resultado, importe_ejecutado);
@@ -1336,7 +1340,7 @@ public class kucoin_sdks extends bases {
                 cantidad_ejecutado = orderResponse.getSize();
                 precio_en_operacion = orderResponse.getPrice();
                 cantidad_en_operacion = orderResponse.getSize();
-                importe_en_operacion = cantidad_en_operacion.multiply(precio_en_operacion);
+                importe_en_operacion = cantidad_en_operacion.multiply(precio_en_operacion, mathContext);
                 retorno_mapa.put(k_consultar_orden_es_trato, true);
                 if (orderResponse.getSide().toLowerCase().equals("buy")) {
                     retorno_mapa.put(k_consultar_orden_origen_resultado, importe_ejecutado);

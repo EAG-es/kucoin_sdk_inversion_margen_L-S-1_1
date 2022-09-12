@@ -26,7 +26,6 @@ public class kucoin_sdk_cluis extends kucoin_sdks {
     public boolean escribir_formateado(String formato, oks ok, Object... extra_array) throws Exception {
         try {
             escribir_linea(formar_texto("", formato, ok, extra_array), ok);
-            System.out.println();
             return true;
         } catch (Exception e) {
             throw e;

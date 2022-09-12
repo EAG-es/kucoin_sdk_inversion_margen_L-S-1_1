@@ -79,7 +79,7 @@ import static innui.kucoin_sdk.kucoin_sdks.k_comprobar_estrategia_l_s_1_resultad
 public class inversion_margen_L_S_1s extends bases {
     public static String k_in_ruta = "in/in";  //NOI18N
     public kucoin_sdk_cluis kucoin_sdk;
-    boolean modo_pruebas = true;
+    boolean modo_pruebas = false;
 
     /**
      * Pantalla principal
