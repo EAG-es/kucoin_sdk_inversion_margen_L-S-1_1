@@ -746,7 +746,7 @@ public class kucoin_sdks extends bases {
             cotizacion_base_bajada = ref_BigDecimal.get();
             mapa_retorno.put(k_orden_compra_bajada_cantidad, cantidad_base);
             mapa_retorno.put(k_orden_compra_bajada_cotizacion, cotizacion_base_bajada);
-            if (borrowQueryResponse_contra != null) {
+            if (prestamo_contra_borrowResponse != null) {
                 borrowQueryResponse_contra = consultar_prestamo(prestamo_contra_borrowResponse, ok);
                 if (ok.es == false) { return null; }
                 mapa_retorno.put(k_prestamo_obtenido_contra, borrowQueryResponse_contra.getFilled());
@@ -776,7 +776,7 @@ public class kucoin_sdks extends bases {
             cotizacion_base_subida_mitad = ref_BigDecimal.get();
             mapa_retorno.put(k_orden_compra_subida_mitad_cantidad, cantidad_contra_prestada);
             mapa_retorno.put(k_orden_compra_subida_mitad_cotizacion, cotizacion_base_subida_mitad);
-            if (borrowQueryResponse_base != null) {
+            if (prestamo_base_borrowResponse != null) {
                 borrowQueryResponse_base = consultar_prestamo(prestamo_base_borrowResponse, ok);
                 mapa_retorno.put(k_prestamo_obtenido_base, borrowQueryResponse_base.getFilled());
                 if (borrowQueryResponse_base.getFilled().compareTo(borrowQueryResponse_base.getSize()) < 0) {
