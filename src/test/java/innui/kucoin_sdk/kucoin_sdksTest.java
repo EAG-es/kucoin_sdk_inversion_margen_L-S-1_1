@@ -95,7 +95,7 @@ public class kucoin_sdksTest {
         kucoin_sdks instance = new kucoin_sdks();
         iniciar(instance, ok);
         assertEquals(ok.es, true);
-        boolean result = instance.crear_cliente(true, ok, extra_array);
+        boolean result = instance.crear_cliente(ok, extra_array);
         assertEquals(ok.es, true);
     }
 
@@ -111,7 +111,7 @@ public class kucoin_sdksTest {
         List<AccountBalancesResponse> expResult = null;
         iniciar(instance, ok);
         assertEquals(ok.es, true);
-        instance.crear_cliente(true, ok);
+        instance.crear_cliente(ok);
         assertEquals(ok.es, true);
         List<AccountBalancesResponse> result = instance.listar_balances_de_cuentas(ok);
         assertNotEquals(ok.es, true);
@@ -150,7 +150,7 @@ public class kucoin_sdksTest {
         kucoin_sdks instance = new kucoin_sdks();
         iniciar(instance, ok);
         assertEquals(ok.es, true);
-        instance.crear_cliente(true, ok);
+        instance.crear_cliente(ok);
         assertEquals(ok.es, true);
         List<AccountBalancesResponse> expResult = null;
         List<AccountBalancesResponse> result = instance.listar_balances_de_cuenta_intercambio(ok, extra_array);
@@ -168,7 +168,7 @@ public class kucoin_sdksTest {
         kucoin_sdks instance = new kucoin_sdks();
         iniciar(instance, ok);
         assertEquals(ok.es, true);
-        instance.crear_cliente(true, ok);
+        instance.crear_cliente(ok);
         assertEquals(ok.es, true);
         List<AccountBalancesResponse> expResult = null;
         List<AccountBalancesResponse> result = instance.listar_balances_de_cuenta_margen(ok, extra_array);
@@ -186,7 +186,7 @@ public class kucoin_sdksTest {
         kucoin_sdks instance = new kucoin_sdks();
         iniciar(instance, ok);
         assertEquals(ok.es, true);
-        instance.crear_cliente(true, ok);
+        instance.crear_cliente(ok);
         assertEquals(ok.es, true);
         List<SymbolResponse> result = instance.listar_simbolos(ok, extra_array);
         assertNotNull(result);
@@ -205,7 +205,7 @@ public class kucoin_sdksTest {
         kucoin_sdks instance = new kucoin_sdks();
         iniciar(instance, ok);
         assertEquals(ok.es, true);
-        instance.crear_cliente(true, ok);
+        instance.crear_cliente(ok);
         assertEquals(ok.es, true);
         List<SymbolResponse> result = instance.listar_simbolos(moneda, mercado, ok, extra_array);
         assertNotNull(result);
@@ -231,7 +231,7 @@ public class kucoin_sdksTest {
         kucoin_sdks instance = new kucoin_sdks();
         iniciar(instance, ok);
         assertEquals(ok.es, true);
-        instance.crear_cliente(true, ok);
+        instance.crear_cliente(ok);
         assertEquals(ok.es, true);
         List<SymbolResponse> result = instance.buscar_par(par, mercado, ok, extra_array);
         assertNotNull(result);
@@ -250,7 +250,7 @@ public class kucoin_sdksTest {
         kucoin_sdks instance = new kucoin_sdks();
         iniciar(instance, ok);
         assertEquals(ok.es, true);
-        instance.crear_cliente(true, ok);
+        instance.crear_cliente(ok);
         assertEquals(ok.es, true);        
         Map<String, BigDecimal> result = instance.leer_cotizacion_usd(simbolo_base, simbolo_contra, ok, extra_array);
         assertNotNull(result);
@@ -268,7 +268,7 @@ public class kucoin_sdksTest {
         kucoin_sdks instance = new kucoin_sdks();
         iniciar(instance, ok);
         assertEquals(ok.es, true);
-        instance.crear_cliente(true, ok);
+        instance.crear_cliente(ok);
         assertEquals(ok.es, true);
         List<MarketItemResponse> result = instance.consultar_mercado_de_prestamos_7_dias(simbolo, ok, extra_array);
         assertNotNull(result);
@@ -286,7 +286,7 @@ public class kucoin_sdksTest {
         kucoin_sdks instance = new kucoin_sdks();
         iniciar(instance, ok);
         assertEquals(ok.es, true);
-        instance.crear_cliente(true, ok);
+        instance.crear_cliente(ok);
         assertEquals(ok.es, true);
         TreeMap<BigDecimal, MarketItemResponse> result = instance.obtener_ratios_mercado_de_prestamos_7_dias(simbolo, ok, extra_array);
         assertNotNull(result);
@@ -311,7 +311,7 @@ public class kucoin_sdksTest {
         kucoin_sdks instance = new kucoin_sdks();
         iniciar(instance, ok);
         assertEquals(ok.es, true);
-        instance.crear_cliente(true, ok);
+        instance.crear_cliente(ok);
         assertEquals(ok.es, true);
         datos_mapa.put(k_pareja_simbolos, "BTC-USDT");
         datos_mapa.put(k_importe_maximo, BigDecimal.valueOf(10000.00));
@@ -344,7 +344,7 @@ public class kucoin_sdksTest {
         kucoin_sdks instance = new kucoin_sdks();
         iniciar(instance, ok);
         assertEquals(ok.es, true);
-        instance.crear_cliente(true, ok);
+        instance.crear_cliente(ok);
         assertEquals(ok.es, true);
         BorrowResponse result = instance.pedir_prestamo_7_dias(simbolo, new ref<BigDecimal>(cantidad), ok, extra_array);
         assertNotNull(result);
@@ -373,7 +373,7 @@ public class kucoin_sdksTest {
         kucoin_sdks instance = new kucoin_sdks();
         iniciar(instance, ok);
         assertEquals(ok.es, true);
-        instance.crear_cliente(true, ok);
+        instance.crear_cliente(ok);
         assertEquals(ok.es, true);
         OrderCreateResponse result = instance.comprar_stop_limit_subida_en_margen(par_base_contra, cantidad_base, new ref<BigDecimal>(cotizacion_base), ok, extra_array);
         assertNotNull(result);
@@ -395,7 +395,7 @@ public class kucoin_sdksTest {
         kucoin_sdks instance = new kucoin_sdks();
         iniciar(instance, ok);
         assertEquals(ok.es, true);
-        instance.crear_cliente(true, ok);
+        instance.crear_cliente(ok);
         assertEquals(ok.es, true);
         OrderCreateResponse result = instance.vender_stop_limit_subida_en_margen(par_base_contra, cantidad_base, new ref<BigDecimal>(cotizacion_base), ok, extra_array);
         assertNotNull(result);
@@ -416,7 +416,7 @@ public class kucoin_sdksTest {
         kucoin_sdks instance = new kucoin_sdks();
         iniciar(instance, ok);
         assertEquals(ok.es, true);
-        instance.crear_cliente(true, ok);
+        instance.crear_cliente(ok);
         assertEquals(ok.es, true);
         OrderCreateResponse result = instance.comprar_stop_limit_bajada_en_margen(par_base_contra, cantidad_base, new ref<BigDecimal>(cotizacion_base), ok, extra_array);
         assertNotNull(result);
@@ -438,7 +438,7 @@ public class kucoin_sdksTest {
         kucoin_sdks instance = new kucoin_sdks();
         iniciar(instance, ok);
         assertEquals(ok.es, true);
-        instance.crear_cliente(true, ok);
+        instance.crear_cliente(ok);
         assertEquals(ok.es, true);
         OrderCreateResponse result = instance.vender_stop_limit_bajada_en_margen(par_base_contra, cantidad_base, new ref<BigDecimal>(cotizacion_base), ok, extra_array);
         assertNotNull(result);
@@ -474,7 +474,7 @@ public class kucoin_sdksTest {
         kucoin_sdks instance = new kucoin_sdks();
         iniciar(instance, ok);
         assertEquals(ok.es, true);
-        instance.crear_cliente(true, ok);
+        instance.crear_cliente(ok);
         assertEquals(ok.es, true);
         MarginOrderCreateResponse result = instance.comprar_en_margen(par_base_contra, cantidad_base, new ref<BigDecimal>(cotizacion_base), ok, extra_array);
         assertNotNull(result);
@@ -494,7 +494,7 @@ public class kucoin_sdksTest {
         kucoin_sdks instance = new kucoin_sdks();
         iniciar(instance, ok);
         assertEquals(ok.es, true);
-        instance.crear_cliente(true, ok);
+        instance.crear_cliente(ok);
         assertEquals(ok.es, true);
         MarginOrderCreateResponse result = instance.vender_en_margen(par_base_contra, cantidad_base, new ref<BigDecimal>(cotizacion_base), ok, extra_array);
         assertNotNull(result);
@@ -593,7 +593,7 @@ public class kucoin_sdksTest {
         kucoin_sdks instance = new kucoin_sdks();
         iniciar(instance, ok);
         assertEquals(ok.es, true);
-        instance.crear_cliente(true, ok);
+        instance.crear_cliente(ok);
         assertEquals(ok.es, true);
         datos_mapa.put(k_ejecutar_estrategia_l_s_1_margen_2_identificador
                 , "BTC-USDT, 631b2c8180903200011eb21f, 631b2c8e6526ab000184cf45, ovs, vs8ueoor5ic3dkgv000v3jv6, ocb, vs8ueoor5if8141i000lehn8, ovb, vs8ueoor5ihjdkgv000v3jv7, ocb, vs8ueoor5iko141i000lehn9, ovsm, 631b2cb40091a6000148da71, ocbm, 631b2cc10091a6000148da80");

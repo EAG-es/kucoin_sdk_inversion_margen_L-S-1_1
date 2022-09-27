@@ -76,10 +76,9 @@ import innui.utiles.bigdecimals.BigDecimals;
  *
  * @author emilio
  */
-public class inversion_margen_L_S_1s extends bases {
+public class inversion_margen_L_S_1s extends iniciales {
     public static String k_in_ruta = "in/in";  //NOI18N
-    public kucoin_sdk_cluis kucoin_sdk;
-    boolean modo_pruebas = false;
+    public kucoin_sdks kucoin_sdk;
 
     /**
      * Pantalla principal
@@ -670,27 +669,36 @@ public class inversion_margen_L_S_1s extends bases {
             if (ok.es == false) { return false; }
             ResourceBundle in = null;
             in = ResourceBundles.getBundle(k_in_ruta);
-            iniciales inicial = new iniciales ();
-            inicial.iniciar(this.getClass(), ok);
+            iniciar(this.getClass(), ok);
             kucoin_sdk = new kucoin_sdk_cluis();
             kucoin_sdk.iniciar(ok);
             if (ok.es == false) { return false; }
-            kucoin_sdk.modelo.clave = inicial.properties.getProperty(kucoin_sdks.modelos.k_clave);
+            kucoin_sdk.modelo.clave = properties.getProperty(kucoin_sdks.modelos.k_clave);
             if (ok.no_nul(kucoin_sdk.modelo.clave) == false) {
                 ok.txt = tr.in(in, "No se encuentra el dato clave. ");
             }
             if (ok.es == false) { return false; }
-            kucoin_sdk.modelo.secreto = inicial.properties.getProperty(kucoin_sdks.modelos.k_secreto);
+            kucoin_sdk.modelo.secreto = properties.getProperty(kucoin_sdks.modelos.k_secreto);
             if (ok.no_nul(kucoin_sdk.modelo.secreto) == false) {
                 ok.txt = tr.in(in, "No se encuentra el dato secreto. ");
             }
             if (ok.es == false) { return false; }
-            kucoin_sdk.modelo.contraseña = inicial.properties.getProperty(kucoin_sdks.modelos.k_contraseña);
+            kucoin_sdk.modelo.contraseña = properties.getProperty(kucoin_sdks.modelos.k_contraseña);
             if (ok.no_nul(kucoin_sdk.modelo.contraseña) == false) {
                 ok.txt = tr.in(in, "No se encuentra la contraseña. ");
             }
             if (ok.es == false) { return false; }
-            kucoin_sdk.crear_cliente(modo_pruebas, ok);
+            String texto = properties.getProperty(kucoin_sdks.modelos.k_es_modo_prueba);
+            if (ok.no_nul(texto) == false) {
+                ok.txt = tr.in(in, "No se encuentra es_modo_prueba. ");
+            }
+            if (texto.equals("0")) {
+                kucoin_sdk.modelo.es_modo_prueba = false;
+            } else {
+                kucoin_sdk.modelo.es_modo_prueba = true;
+            }
+            if (ok.es == false) { return false; }
+            kucoin_sdk.crear_cliente(ok);
             ver_pantalla_principal(ok);
             return ok.es;
         } catch (Exception e) {
@@ -721,4 +729,9 @@ public class inversion_margen_L_S_1s extends bases {
             }
         }
     }    
+
+    @Override
+    public boolean iniciar_dependencias(oks ok, Object... extra_array) throws Exception {
+        return true;
+    }
 }

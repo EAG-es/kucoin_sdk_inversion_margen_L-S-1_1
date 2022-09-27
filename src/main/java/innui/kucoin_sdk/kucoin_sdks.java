@@ -54,11 +54,12 @@ public class kucoin_sdks extends bases {
         public static String k_clave = "innui.kucoin_sdk.kucoin_sdks.modelo.clave";
         public static String k_secreto = "innui.kucoin_sdk.kucoin_sdks.modelo.secreto";
         public static String k_contraseña = "innui.kucoin_sdk.kucoin_sdks.modelo.contraseña";        
+        public static String k_es_modo_prueba = "innui.kucoin_sdk.kucoin_sdks.modelo.es_modo_prueba";
         public String url_base; 
         public String clave;
         public String secreto;
         public String contraseña;
-        // Ejemplo: "63139fc92b968a000153da04", "79904964-6e13-4a61-a7c5-ad7a45f7642f", "sandbox.kucoin.com"    
+        public boolean es_modo_prueba;
     }
     public static String k_in_ruta = "in/innui/kucoin_sdk/in";  //NOI18N    
     public static String k_margen="k_margen";
@@ -144,11 +145,11 @@ public class kucoin_sdks extends bases {
      * @return true si todo va bien
      * @throws Exception Opción de notificar errores de excepción
      */
-    public boolean crear_cliente(boolean es_modo_pruebas, oks ok, Object ... extra_array) throws Exception  {
+    public boolean crear_cliente(oks ok, Object ... extra_array) throws Exception  {
         try {
             if (ok.es == false) { return false; }
             _kucoinClientBuilder = new KucoinClientBuilder();
-            if (es_modo_pruebas) {                
+            if (modelo.es_modo_prueba) { 
                 _kucoinClientBuilder = _kucoinClientBuilder.withBaseUrl(modelos.k_url_base_sandbox_kucoin)
                     .withApiKey(modelo.clave, modelo.secreto, modelo.contraseña);
             } else {

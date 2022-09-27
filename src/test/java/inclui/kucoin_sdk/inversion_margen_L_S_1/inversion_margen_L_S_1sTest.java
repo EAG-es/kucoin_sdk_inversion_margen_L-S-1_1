@@ -54,30 +54,39 @@ public class inversion_margen_L_S_1sTest {
         try{
             ResourceBundle in = null;
             in = ResourceBundles.getBundle(k_in_ruta);
-            iniciales inicial = new iniciales ();
-            ok.es = inicial.iniciar(inversion_margen_L_S_1s.getClass(), ok);
+            ok.es = inversion_margen_L_S_1s.iniciar(inversion_margen_L_S_1s.getClass(), ok);
             inversion_margen_L_S_1s.kucoin_sdk = new kucoin_sdk_cluis();
             ok.es = inversion_margen_L_S_1s.kucoin_sdk.iniciar(ok);
             if (ok.es) {
-                inversion_margen_L_S_1s.kucoin_sdk.modelo.clave = inicial.properties.getProperty(kucoin_sdks.modelos.k_clave);
+                inversion_margen_L_S_1s.kucoin_sdk.modelo.clave = inversion_margen_L_S_1s.properties.getProperty(kucoin_sdks.modelos.k_clave);
                 if (ok.no_nul(inversion_margen_L_S_1s.kucoin_sdk.modelo.clave) == false) {
                     ok.txt = tr.in(in, "No se encuentra el dato clave. ");
                 }
             }
             if (ok.es) {
-                inversion_margen_L_S_1s.kucoin_sdk.modelo.secreto = inicial.properties.getProperty(kucoin_sdks.modelos.k_secreto);
+                inversion_margen_L_S_1s.kucoin_sdk.modelo.secreto = inversion_margen_L_S_1s.properties.getProperty(kucoin_sdks.modelos.k_secreto);
                 if (ok.no_nul(inversion_margen_L_S_1s.kucoin_sdk.modelo.secreto) == false) {
                     ok.txt = tr.in(in, "No se encuentra el dato secreto. ");
                 }
             }
             if (ok.es) {
-                inversion_margen_L_S_1s.kucoin_sdk.modelo.contraseña = inicial.properties.getProperty(kucoin_sdks.modelos.k_contraseña);
+                inversion_margen_L_S_1s.kucoin_sdk.modelo.contraseña = inversion_margen_L_S_1s.properties.getProperty(kucoin_sdks.modelos.k_contraseña);
                 if (ok.no_nul(inversion_margen_L_S_1s.kucoin_sdk.modelo.contraseña) == false) {
                     ok.txt = tr.in(in, "No se encuentra la contraseña. ");
                 }
             }
+            String texto = inversion_margen_L_S_1s.properties.getProperty(kucoin_sdks.modelos.k_es_modo_prueba);
+            if (ok.no_nul(texto) == false) {
+                ok.txt = tr.in(in, "No se encuentra es_modo_prueba. ");
+            }
+            if (texto.equals("0")) {
+                inversion_margen_L_S_1s.kucoin_sdk.modelo.es_modo_prueba = false;
+            } else {
+                inversion_margen_L_S_1s.kucoin_sdk.modelo.es_modo_prueba = true;
+            }
+            if (ok.es == false) { return false; }
             if (ok.es) {
-                ok.es = inversion_margen_L_S_1s.kucoin_sdk.crear_cliente(inversion_margen_L_S_1s.modo_pruebas, ok);
+                ok.es = inversion_margen_L_S_1s.kucoin_sdk.crear_cliente(ok);
             }
             return ok.es;
         } catch (Exception e) {
